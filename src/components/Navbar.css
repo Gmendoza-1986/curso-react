@@ -18,3 +18,12 @@
   line-height: 1;
   padding: 0.25rem 0.35rem;
 }
+/* navbar */
+.nav-link-hover {
+  transition: all 0.2s ease;
+}
+
+.nav-link-hover:hover {
+  background: #f1f1f1;
+  border-radius: 999px;
+}
