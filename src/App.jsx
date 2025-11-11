@@ -1,24 +1,19 @@
+// src/App.jsx
 import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ItemListContainer from "./components/ItemListContainer";
-
+import ItemDetailContainer from "./components/ItemDetailContainer";
 
 export default function App() {
-  const greeting = "Bienvenido al mejor e-commerce de celulares";
-
   return (
-    <>
-     
-      <Navbar
-        logo={{
-          name: "Celumarket",
-          icon: "📱",
-          slogan: "Tecnología a tu alcance",
-        }}
-      />
-
-      
-      <ItemListContainer greeting={greeting} />
-    </>
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<ItemListContainer />} />
+        <Route path="/category/:categoryId" element={<ItemListContainer />} />
+        <Route path="/item/:id" element={<ItemDetailContainer />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
