@@ -1,26 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase/config"; 
 import ItemDetail from "./ItemDetail";
 
 export default function ItemDetailContainer() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState({ loading: true, error: null });
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      const res = await fetch(`https://dummyjson.com/products/${id}`);
-      const data = await res.json();
-      setProduct(data);
-      setTimeout(() => setLoading(false), 400);
+    const fetch = async () => {
+      try {
+        setState({ loading: true, error: null });
+
+        const ref = doc(db, "productos", id);
+        const snap = await getDoc(ref);
+
+        if (!snap.exists()) {
+          setState({ loading: false, error: "Producto no encontrado" });
+          return;
+        }
+
+        setProduct({ id: snap.id, ...snap.data() });
+        setState({ loading: false, error: null });
+      } catch (err) {
+        setState({ loading: false, error: err.message });
+      }
     };
-    fetchProduct();
+
+    fetch();
   }, [id]);
 
-  if (loading) return <div className="container text-center py-5">Cargando producto...</div>;
+  if (state.loading)
+    return <div className="text-center py-5">Cargando producto...</div>;
+  if (state.error)
+    return <div className="text-center text-danger py-5">{state.error}</div>;
 
   return (
-    <div className="container py-5">
+    <div className="container py-4">
       <ItemDetail product={product} />
     </div>
   );

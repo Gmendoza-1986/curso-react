@@ -1,17 +1,22 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import "./Navbar.css";
 import CartWidget from "./CartWidget";
+import "./Navbar.css";
 
 export default function Navbar() {
-
-  const categorias = ["Smartphones", "Laptops", "Tablets", "Fragrances", "Sunglasses"];
+  // 👇 Tus categorías EXACTAS de Firestore:
+  const categorias = ["Celulares", "Notebook", "Tablets"];
 
   return (
     <nav className="navbar bg-light border-bottom shadow-sm py-3">
       <div className="container d-flex align-items-center justify-content-between">
-        <NavLink to="/" className="navbar-brand fw-bold text-dark">📱 Catmarket</NavLink>
+        
+        {/* Logo */}
+        <NavLink to="/" className="navbar-brand fw-bold text-dark">
+          📱 CatMarket
+        </NavLink>
 
+        {/* Categorías */}
         <ul className="nav mx-auto gap-3">
           {categorias.map((cat) => (
             <li key={cat} className="nav-item">
@@ -27,8 +32,9 @@ export default function Navbar() {
           ))}
         </ul>
 
+        {/* Carrito */}
         <div className="ms-auto">
-          <CartWidget count={3} />
+          <CartWidget />
         </div>
       </div>
     </nav>

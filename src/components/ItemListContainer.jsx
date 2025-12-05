@@ -1,68 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ItemList from "./ItemList";
+import { getProductos } from "../firebase/bbdd"; // 👈 ruta corregida
 
 export default function ItemListContainer() {
   const { categoryId } = useParams();
   const [products, setProducts] = useState([]);
   const [state, setState] = useState({ loading: true, error: null });
-  const [limit, setLimit] = useState(12); // 👈 cantidad inicial
 
   useEffect(() => {
     let alive = true;
-    setProducts([]);
-    setState({ loading: true, error: null });
 
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const url = categoryId
-          ? `https://dummyjson.com/products/category/${encodeURIComponent(categoryId)}?limit=${limit}`
-          : `https://dummyjson.com/products?limit=${limit}`;
-        console.log("[fetch]", url);
+        setState({ loading: true, error: null });
 
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const rawProducts = await getProductos();
 
-        const data = await res.json();
-        const items = Array.isArray(data.products) ? data.products : [];
+        const filtrados = categoryId
+          ? rawProducts.filter((p) => p.categoria === categoryId)
+          : rawProducts;
 
-        if (alive) setProducts(items);
+        if (!alive) return;
+
+        setProducts(filtrados);
+        setState({ loading: false, error: null });
       } catch (err) {
-        if (alive) setState({ loading: false, error: err.message || "Error" });
-      } finally {
-        if (alive) setState((s) => ({ ...s, loading: false }));
+        if (!alive) return;
+        setState({ loading: false, error: err.message });
       }
     };
 
-    fetchProducts();
-    return () => { alive = false; };
-  }, [categoryId, limit]); //carga más productos
+    fetchData();
 
-  if (state.loading) return <div className="container text-center py-5">Cargando...</div>;
-  if (state.error) return <div className="container text-center py-5 text-danger">Error: {state.error}</div>;
+    return () => {
+      alive = false;
+    };
+  }, [categoryId]);
+
+  if (state.loading) {
+    return <div className="container text-center py-5">Cargando...</div>;
+  }
+
+  if (state.error) {
+    return (
+      <div className="container text-center py-5 text-danger">
+        {state.error}
+      </div>
+    );
+  }
 
   return (
     <div className="container py-4 text-center">
       <h2 className="text-center mb-4">
-        {categoryId ? `Productos en ${categoryId}` : "Conoce nuestro catálogo completo"}
+        {categoryId ? `Productos en ${categoryId}` : "Catálogo general"}
       </h2>
 
       {products.length ? (
-        <>
-          <ItemList products={products} />
-
-       
-          <div className="text-center mt-4">
-            <button
-              className="btn btn-outline-primary"
-              onClick={() => setLimit((prev) => prev + 8)} 
-            >
-              Ver más productos
-            </button>
-          </div>
-        </>
+        <ItemList products={products} />
       ) : (
-        <p className="text-center">No hay productos.</p>
+        <p>No hay productos para mostrar.</p>
       )}
     </div>
   );
